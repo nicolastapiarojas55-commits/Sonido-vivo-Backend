@@ -10,13 +10,29 @@ async function buscarPorRun(run) {
   return r.rows[0] || null;
 }
 async function crear(u) {
-  const r = await pool.query(
-    `INSERT INTO usuario (run, nombre, apellidos, email, password, tipo, fecha_nacimiento, region, comuna, direccion)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING ${COLUMNAS}`,
-    [u.run, u.nombre, u.apellidos, u.email, u.password, u.tipo,
-     u.fechaNacimiento || null, u.region || null, u.comuna || null, u.direccion || null]
-  );
-  return r.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const r = await client.query(
+      `INSERT INTO usuario (run, nombre, apellidos, email, password, tipo, fecha_nacimiento)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING ${COLUMNAS}`,
+      [u.run, u.nombre, u.apellidos, u.email, u.password, u.tipo, u.fechaNacimiento || null]
+    );
+    const usuario = r.rows[0];
+    if (u.tipo === 'Cliente') {
+      await client.query(
+        `INSERT INTO cliente (usuario_id, direccion, telefono, comuna_id) VALUES ($1,$2,$3,$4)`,
+        [usuario.id, u.direccion || null, u.telefono || null, u.comunaId || null]
+      );
+    }
+    await client.query('COMMIT');
+    return usuario;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
 }
 
 async function listar() {
