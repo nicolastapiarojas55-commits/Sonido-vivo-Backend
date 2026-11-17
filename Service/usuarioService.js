@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const repo = require('../Repository/usuarioRepository');
 const { generarToken } = require('../Utils/jwt');
-
+const ROLES = ['Administrador', 'Vendedor', 'Cliente'];
 const error = (status, mensaje) => ({ status, mensaje });
 
 const PATRONES = {
@@ -59,9 +59,7 @@ async function login(datos) {
   const emailNorm = String(email).trim().toLowerCase();
 
   const usuario = await repo.buscarPorEmail(emailNorm);
-  if(!usuario){
-    throw error(401, 'Credenciales incorrectas');
-  }
+  if (!usuario || !usuario.activo) throw error(401, 'Credenciales incorrectas');
 
   const passwordValida = await bcrypt.compare(password, usuario.password);
   if(!passwordValida){
@@ -89,4 +87,60 @@ async function login(datos) {
 async function listar() {
   return await repo.listar();
 }
-module.exports = { registrar , login, listar};
+
+function validarId(id) {
+  if (!Number.isInteger(Number(id))) throw error(400, 'Id inválido');
+}
+
+// un usuario solo puede acceder a su propia cuenta, salvo el Administrador
+function validarAcceso(id, solicitante) {
+  if (solicitante.tipo !== 'Administrador' && String(solicitante.id) !== String(id)) {
+    throw error(403, 'No tienes permiso para acceder a este usuario');
+  }
+}
+
+async function obtener(id, solicitante) {
+  validarId(id);
+  validarAcceso(id, solicitante);
+  const usuario = await repo.buscarPorId(id);
+  if (!usuario) throw error(404, 'Usuario no encontrado');
+  return usuario;
+}
+
+async function actualizar(id, datos, solicitante) {
+  validarId(id);
+  validarAcceso(id, solicitante);
+  const actual = await repo.buscarPorId(id);
+  if (!actual) throw error(404, 'Usuario no encontrado');
+
+  const { nombre, apellidos, email, fechaNacimiento, tipo } = datos || {};
+
+  if (email && !PATRONES.correo.test(email)) throw error(400, 'Correo inválido');
+
+  if (tipo && tipo !== actual.tipo) {
+    if (solicitante.tipo !== 'Administrador')
+      throw error(403, 'Solo el Administrador puede cambiar el rol');
+    if (!ROLES.includes(tipo)) throw error(400, 'Rol inválido');
+  }
+
+  const emailNorm = email ? email.trim().toLowerCase() : actual.email;
+  if (emailNorm !== actual.email && await repo.buscarPorEmail(emailNorm)) {
+    throw error(409, 'El correo ya está registrado');
+  }
+
+  return await repo.actualizar(id, {
+    nombre: nombre || actual.nombre,
+    apellidos: apellidos || actual.apellidos,
+    email: emailNorm,
+    fechaNacimiento: fechaNacimiento || actual.fecha_nacimiento,
+    tipo: tipo || actual.tipo
+  });
+}
+
+async function eliminar(id, solicitante) {
+  validarId(id);
+  if (String(solicitante.id) === String(id))
+    throw error(409, 'No puedes desactivar tu propia cuenta');
+  if (!(await repo.desactivar(id))) throw error(404, 'Usuario no encontrado');
+}
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar};

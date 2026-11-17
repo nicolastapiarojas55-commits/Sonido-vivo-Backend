@@ -1,5 +1,25 @@
 const pool = require('../Database/db');
-const COLUMNAS = 'id, run, nombre, apellidos, email, tipo, fecha_nacimiento';
+const COLUMNAS = 'id, run, nombre, apellidos, email, tipo, fecha_nacimiento, activo';
+
+async function buscarPorId(id) {
+  const r = await pool.query(`SELECT ${COLUMNAS} FROM usuario WHERE id = $1`, [id]);
+  return r.rows[0] || null;
+}
+async function actualizar(id, u) {
+  const r = await pool.query(
+    `UPDATE usuario
+     SET nombre = $1, apellidos = $2, email = $3, fecha_nacimiento = $4, tipo = $5
+     WHERE id = $6
+     RETURNING ${COLUMNAS}`,
+    [u.nombre, u.apellidos, u.email, u.fechaNacimiento, u.tipo, id]
+  );
+  return r.rows[0] || null;
+}
+
+async function desactivar(id) {
+  const r = await pool.query('UPDATE usuario SET activo = FALSE WHERE id = $1', [id]);
+  return r.rowCount > 0;
+}
 
 async function buscarPorEmail(email) {
   const r = await pool.query('SELECT * FROM usuario WHERE email = $1', [email]);
@@ -39,4 +59,4 @@ async function listar() {
   const r = await pool.query(`SELECT ${COLUMNAS} FROM usuario`);
   return r.rows;
 }
-module.exports = { buscarPorEmail, buscarPorRun, crear, listar };
+module.exports = { buscarPorEmail, buscarPorRun, crear, listar, buscarPorId, actualizar, desactivar };
