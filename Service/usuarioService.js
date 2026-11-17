@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const repo = require('../Repository/usuarioRepository');
+const { generarToken } = require('../Utils/jwt');
 
 const error = (status, mensaje) => ({ status, mensaje });
 
@@ -28,13 +29,63 @@ async function registrar(datos) {
 
   const hash = await bcrypt.hash(password, 10);
   try {
-    return await repo.crear({
+    const usuarioCreado = await repo.crear({
       run: runNorm, nombre, apellidos, email: emailNorm,
       password: hash, tipo: 'Cliente', fechaNacimiento, region, comuna, direccion
     });
+
+    const payload = { id: usuarioCreado.id, email: usuarioCreado.email, tipo: usuarioCreado.tipo };
+    const token = await generarToken(payload);
+
+    return {
+      mensaje: 'Usuario registrado exitosamente',
+      token,
+      usuario: usuarioCreado
+    };
   } catch (e) {
-    if (e.code === '23505') throw error(409, 'Usuario ya registrado'); // choque UNIQUE
+    if (e.code === '23505') throw error(409, 'Usuario ya registrado');
     throw e;
   }
 }
-module.exports = { registrar };
+
+async function login(datos) {
+  const { email, password } = datos || {};
+
+  if(!email || !password){
+    throw error(400, 'Faltan credenciales');
+  }
+
+  const emailNorm = String(email).trim().toLowerCase();
+
+  const usuario = await repo.buscarPorEmail(emailNorm);
+  if(!usuario){
+    throw error(401, 'Credenciales incorrectas');
+  }
+
+  const passwordValida = await bcrypt.compare(password, usuario.password);
+  if(!passwordValida){
+    throw error(401, 'Credenciales incorrectas');
+  }
+
+  const payload = {
+    id: usuario.id,
+    email: usuario.email,
+    tipo: usuario.tipo
+  };
+  const token = await generarToken(payload);
+
+  return {
+    mensaje: `Bienvenido ${usuario.nombre} a tienda sonido vivo`,
+    token: token,
+    usuario: {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      tipo: usuario.tipo
+    }
+  };
+}
+
+async function listar() {
+  return await repo.listar();
+}
+module.exports = { registrar , login, listar};

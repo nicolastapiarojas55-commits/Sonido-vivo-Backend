@@ -18,4 +18,9 @@ async function crear(u) {
   );
   return r.rows[0];
 }
-module.exports = { buscarPorEmail, buscarPorRun, crear };
+
+async function listar() {
+  const r = await pool.query(`SELECT ${COLUMNAS} FROM usuario`);
+  return r.rows;
+}
+module.exports = { buscarPorEmail, buscarPorRun, crear, listar };
