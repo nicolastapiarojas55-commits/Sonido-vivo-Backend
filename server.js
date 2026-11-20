@@ -7,7 +7,17 @@ const usuarioRoutes = require('./Routes/usuarioRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDoc = require('./Docs/swagger');
 const app = express();
-app.use(cors());
+
+const origenes = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map((origen) => origen.trim())
+    .filter(Boolean);
+    
+app.use(cors({
+    origin: origenes,
+    credentials: true
+}));
+
 app.use(express.json());
 app.use('/api/v1/usuarios', usuarioRoutes);
 app.use('/api/v1/auth', authRoutes);
@@ -16,7 +26,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 
 const PORT = process.env.PORT || 3000;
-const ENV = process.env.NODE_ENV || 'Desarrollo';
+
+
+
 
 async function arrancarServidor() {
     try {
@@ -38,7 +50,7 @@ async function arrancarServidor() {
   ======================================================
   Local (Interno) : http://localhost:${PORT}
   Red (Externo)   : http://[IP-PUBLICA-DE-EC2]:${PORT}
-  Entorno        : ${ENV}
+  Entorno        : Desarrollo
   Base de Datos  : [ OK ] Online y Sincronizada
   Versión Node   : ${process.version}
   Arranque       : ${new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })}
@@ -46,7 +58,7 @@ async function arrancarServidor() {
             `);
         });
     } catch (error) {
-        console.error('El servidor no pudo arrancar debido a un error crítico:', error);
+        console.error('El servidor no pudo arrancar debido a un error:', error);
         process.exit(1);
     }
 }
