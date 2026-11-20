@@ -4,7 +4,7 @@ VALUES (
     'Admin',
     'Sistema',
     'admin@duoc.cl',
-    '$2a$12$Tlqw7QX6mNq3DJpMRPvhrOUzmS2GxW3aKr0a6zS9alCwJMh5AECyy',
+    '$2a$12$Tlqw7QX6mNq3DJpMRPvhrOUzmS2GxW3aKr0a6zS9alCwJMh5AECyy', --"12345" NO BORRAR
     'Administrador'
 ) ON CONFLICT (email) DO NOTHING;
 
