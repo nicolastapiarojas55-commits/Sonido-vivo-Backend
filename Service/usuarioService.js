@@ -20,7 +20,9 @@ async function registrar(datos) {
     throw error(400, 'RUN inválido');
   if (!PATRONES.correo.test(email))
     throw error(400, 'Correo inválido');
-  if (password.length < 4 || password.length > 10)
+
+  //se modifico de 10 a 64 el largo de la contraseña para seguir buenas practicas de seguridad
+  if (password.length < 4 || password.length > 64)
     throw error(400, 'La contraseña debe tener entre 4 y 10 caracteres');
 
   const emailNorm = email.trim().toLowerCase();
