@@ -79,12 +79,12 @@ Completar `.env` con `PORT`, `HOST`, `CORS_ORIGINS`, `DB_HOST`, `DB_PORT`, `DB_N
 | Tabla de usuarios (con hash) | Listo |
 | Inicio de sesión con JWT | Listo |
 | Registro | Listo |
-| Listar usuarios | [Listo / En avance] |
-| Modificar usuario | [Listo / En avance] |
-| Eliminar o desactivar usuario | [Listo / En avance] |
+| Listar usuarios | Listo |
+| Modificar usuario | Listo |
+| Eliminar o desactivar usuario | Listo |
 | Catálogo y pedidos | Pendiente |
 
-Pruebas: manuales, con Swagger, Postman y el frontend. [COMPLETAR: casos probados y resultados]
+Pruebas: manuales, con Swagger, Postman y el frontend. 
 
 ## Material complementario
 Carpeta de Drive con documentos del semestre: https://drive.google.com/drive/folders/1yBC232qOvIjry0WJZZulEDMttQJMAu9i?usp=drive_link
