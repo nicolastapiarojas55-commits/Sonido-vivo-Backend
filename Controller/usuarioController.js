@@ -1,8 +1,10 @@
 const service = require('../Service/usuarioService');
+const { registroRequestDto, loginRequestDto } = require('../Dto/usuario.dto');
 
 async function login(req, res) {
   try {
-    const resultado = await service.login(req.body);
+    const entrada = loginRequestDto(req.body);
+    const resultado = await service.login(entrada);
     res.status(200).json(resultado);
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.mensaje });
@@ -13,7 +15,8 @@ async function login(req, res) {
 
 async function registrar(req, res) {
   try {
-    const resultado = await service.registrar(req.body);
+    const entrada = registroRequestDto(req.body)
+    const resultado = await service.registrar(entrada);
     res.status(201).json(resultado);
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.mensaje });
