@@ -30,7 +30,10 @@ Sonido-vivo-Backend/
 ```
 Flujo: Ruta → Controller (responde con el estado HTTP) → Service (reglas del negocio) → Repository (SQL) → PostgreSQL. El Model define el usuario que se devuelve, sin contraseña.
 
-Responsabilidades: Felix, tablas y estructura de capas; Corina, inicio de sesión; Jean, registro; [COMPLETAR: resto].
+Responsabilidades: 
+- Felix: esquema de tablas, estructura de capas, lógica y endpoints del crud para usuarios.
+- Corina: login y listar usuarios, autenticación, archivos de inicialización y configuración de cors.
+- Jean: registro de usuario, conexión frontend-backend.
 
 ## Tecnologías y sus versiones
 - Node.js + Express -> 22 + ^5.3.0
@@ -38,7 +41,9 @@ Responsabilidades: Felix, tablas y estructura de capas; Corina, inicio de sesió
 - pg, bcryptjs, jose, swagger-ui-express -> ^8.23.1, ^3.0.3, ^6.2.17, ^5.0.1
 
 ## Base de datos
-Diagrama entidad-relación: <img width="1659" height="770" alt="imagen" src="https://github.com/user-attachments/assets/0cb94b70-70aa-400e-84f0-945e05f23033" />
+Diagrama entidad-relación: <img width="4245" height="1980" alt="DIAGRAMA ENTIDAD RELACION BACKEND TIENDA PRODUCTOS(1)" src="https://github.com/user-attachments/assets/f5dc083b-dbce-41aa-9246-5baec2f2b574" />
+
+
 
 Tablas implementadas: `usuario`, `cliente`, `admin`, `region` y `comuna`. `cliente` y `admin` se relacionan 1 a 1 con `usuario`. `run` y `email` son únicos y `tipo` solo admite Administrador, Vendedor o Cliente. Eliminar un usuario lo desactiva (`activo = false`).
 
