@@ -1,5 +1,5 @@
 const service = require('../Service/usuarioService');
-const { registroRequestDto, loginRequestDto } = require('../Dto/usuario.dto');
+const { registroRequestDto, loginRequestDto, crearUsuarioRequestDto, actualizarRequestDto } = require('../Dto/usuario.dto');
 
 async function login(req, res) {
   try {
@@ -46,7 +46,9 @@ async function obtener(req, res) {
 }
 
 async function actualizar(req, res) {
-  try { res.status(200).json(await service.actualizar(req.params.id, req.body, req.usuario)); }
+  try { 
+    const datos = actualizarRequestDto(req.body);
+    res.status(200).json(await service.actualizar(req.params.id, datos, req.usuario)); }
   catch (e) { responderError(res, e); }
 }
 
@@ -55,4 +57,11 @@ async function eliminar(req, res) {
   catch (e) { responderError(res, e); }
 }
 
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar };
+async function crear(req, res) {
+  try { 
+    const datos = crearUsuarioRequestDto(req.body);
+    res.status(201).json(await service.crear(datos)); }
+  catch (e) { responderError(res, e); }
+}
+
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear };

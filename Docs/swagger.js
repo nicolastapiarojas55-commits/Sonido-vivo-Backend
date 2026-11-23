@@ -70,6 +70,19 @@ module.exports = {
           tipo: { type: 'string', enum: ['Administrador', 'Vendedor', 'Cliente'],
                   description: 'Solo el Administrador puede cambiarlo' }
         }
+      },
+      CrearUsuario: {
+        type: 'object',
+        required: ['run', 'nombre', 'apellidos', 'email', 'password', 'tipo'],
+        properties: {
+          run: { type: 'string', example: '12345678K' },
+          nombre: { type: 'string', example: 'Luis' },
+          apellidos: { type: 'string', example: 'Soto' },
+          email: { type: 'string', example: 'luis@duoc.cl' },
+          password: { type: 'string', example: 'Clave1234', description: '4 a 60 caracteres' },
+          tipo: { type: 'string', enum: ['Administrador', 'Vendedor', 'Cliente'] },
+          fechaNacimiento: { type: 'string', format: 'date' }
+        }
       }
     }
   },
@@ -104,6 +117,17 @@ module.exports = {
                  content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Usuario' } } } } },
           401: error('Token ausente, inválido o vencido'),
           403: error('Rol insuficiente')
+        }
+      },
+      post: {
+        tags: ['Usuarios'], summary: 'Crear un usuario con el rol elegido (solo Administrador)', security: seguridad,
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CrearUsuario' } } } },
+        responses: {
+          201: { description: 'Usuario creado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
+          400: error('Datos inválidos o rol inválido'),
+          401: error('Token ausente, inválido o vencido'),
+          403: error('Rol insuficiente'),
+          409: error('Correo o RUN ya registrado')
         }
       }
     },
