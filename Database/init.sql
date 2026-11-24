@@ -48,11 +48,12 @@ CREATE TABLE IF NOT EXISTS modelo (
 
 CREATE TABLE IF NOT EXISTS producto (
     id SERIAL PRIMARY KEY,
-    codigo VARCHAR(3) NOT NULL UNIQUE,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
     descripcion VARCHAR(500) NOT NULL,
     precio NUMERIC(10,2) NOT NULL CHECK (precio >= 0),
     stock INT NOT NULL CHECK (stock >= 0),
     marca_id INT NOT NULL REFERENCES marca(id),
-    modelo_id INT NOT NULL REFERENCES modelo(id)
+    modelo_id INT NOT NULL REFERENCES modelo(id),
+    categoria VARCHAR(50) NOT NULL
 );

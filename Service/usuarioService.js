@@ -94,7 +94,7 @@ function validarId(id) {
   if (!Number.isInteger(Number(id))) throw error(400, 'Id inválido');
 }
 
-// un usuario solo puede acceder a su propia cuenta, salvo el Administrador
+
 function validarAcceso(id, solicitante) {
   if (solicitante.tipo !== 'Administrador' && String(solicitante.id) !== String(id)) {
     throw error(403, 'No tienes permiso para acceder a este usuario');
