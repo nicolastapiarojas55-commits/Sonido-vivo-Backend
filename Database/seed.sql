@@ -12,7 +12,7 @@ INSERT INTO admin (usuario_id)
 SELECT id FROM usuario WHERE email = 'admin@duoc.cl'
 ON CONFLICT (usuario_id) DO NOTHING;
 
--- ===== Regiones y comunas (desde Regiones.json) =====
+
 INSERT INTO region (nombre) VALUES
   ('Arica y Parinacota'),
   ('Tarapacá'),
@@ -123,7 +123,7 @@ FROM (VALUES
 JOIN region r ON r.nombre = v.region
 WHERE NOT EXISTS (SELECT 1 FROM comuna c WHERE c.region_id = r.id AND c.nombre = v.comuna);
 
--- ===== Marcas, modelos y productos (desde Productos.json) =====
+
 INSERT INTO marca (nombre) VALUES
   ('Yamaha'),
   ('Fender'),

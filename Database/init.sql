@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS producto (
     stock INT NOT NULL CHECK (stock >= 0),
     marca_id INT NOT NULL REFERENCES marca(id),
     modelo_id INT NOT NULL REFERENCES modelo(id),
-    categoria_id INT NOT NULL REFERENCES categoria(id)
+    categoria VARCHAR(50) NOT NULL
 );
 
 --Esto es para desarrollo de apps moviles
