@@ -62,3 +62,8 @@ CREATE TABLE IF NOT EXISTS producto (
     modelo_id INT NOT NULL REFERENCES modelo(id),
     categoria_id INT NOT NULL REFERENCES categoria(id)
 );
+
+--Esto es para desarrollo de apps moviles
+ALTER TABLE usuario DROP CONSTRAINT usuario_tipo_check;
+ALTER TABLE usuario ADD CONSTRAINT usuario_tipo_check
+  CHECK (tipo IN ('Administrador','Encargado','Vendedor','Cliente'));

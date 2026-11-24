@@ -4,7 +4,7 @@ const PATRONES = {
     correo: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     run: /^\d{6,8}[0-9K]$/i
 }
-const ROLES = ['Administrador', 'Vendedor', 'Cliente'];
+const ROLES = ['Administrador', 'Vendedor', 'Cliente', 'Encargado'];
 const PASSWORD_MIN = 4;
 const PASSWORD_MAX = 64;
 
