@@ -44,6 +44,8 @@ async function crear(u) {
         `INSERT INTO cliente (usuario_id, direccion, telefono, comuna_id) VALUES ($1,$2,$3,$4)`,
         [usuario.id, u.direccion || null, u.telefono || null, u.comunaId || null]
       );
+    }else if (u.tipo === 'Administrador') {
+      await client.query('INSERT INTO admin (usuario_id) VALUES ($1)', [usuario.id]);
     }
     await client.query('COMMIT');
     return usuario;

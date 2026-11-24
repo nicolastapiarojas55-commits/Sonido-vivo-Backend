@@ -30,15 +30,20 @@ Sonido-vivo-Backend/
 ```
 Flujo: Ruta → Controller (responde con el estado HTTP) → Service (reglas del negocio) → Repository (SQL) → PostgreSQL. El Model define el usuario que se devuelve, sin contraseña.
 
-Responsabilidades: Felix, tablas y estructura de capas; Corina, inicio de sesión; Jean, registro; [COMPLETAR: resto].
+Responsabilidades: 
+- Felix: esquema de tablas, estructura de capas, lógica y endpoints del crud para usuarios.
+- Corina: login y listar usuarios, autenticación, archivos de inicialización y configuración de cors.
+- Jean: registro de usuario, conexión frontend-backend.
 
 ## Tecnologías y sus versiones
-- Node.js + Express -> [versión]
-- PostgreSQL en Amazon RDS, ejecutado desde una instancia EC2 -> [versión]
-- pg, bcryptjs, jose, swagger-ui-express -> [versión]
+- Node.js + Express -> 22 + ^5.3.0
+- PostgreSQL en Amazon RDS, ejecutado desde una instancia EC2
+- pg, bcryptjs, jose, swagger-ui-express -> ^8.23.1, ^3.0.3, ^6.2.17, ^5.0.1
 
 ## Base de datos
-Diagrama entidad-relación: [ENLACE A DRIVE]
+Diagrama entidad-relación: <img width="4245" height="1980" alt="DIAGRAMA ENTIDAD RELACION BACKEND TIENDA PRODUCTOS(1)" src="https://github.com/user-attachments/assets/f5dc083b-dbce-41aa-9246-5baec2f2b574" />
+
+
 
 Tablas implementadas: `usuario`, `cliente`, `admin`, `region` y `comuna`. `cliente` y `admin` se relacionan 1 a 1 con `usuario`. `run` y `email` son únicos y `tipo` solo admite Administrador, Vendedor o Cliente. Eliminar un usuario lo desactiva (`activo = false`).
 
@@ -63,7 +68,8 @@ Documentación: `http://[IP-EC2]:3000/api-docs`. Base: `/api/v1`.
 
 
 
-Diagrama de secuencia del login: [ENLACE]
+Diagrama de secuencia del login: <img width="1428" height="838" alt="imagen" src="https://github.com/user-attachments/assets/ef0f41bb-7334-45b0-b857-a43d477a3f94" />
+
 
 ## Cómo ejecutar el proyecto
 ```
@@ -79,12 +85,27 @@ Completar `.env` con `PORT`, `HOST`, `CORS_ORIGINS`, `DB_HOST`, `DB_PORT`, `DB_N
 | Tabla de usuarios (con hash) | Listo |
 | Inicio de sesión con JWT | Listo |
 | Registro | Listo |
-| Listar usuarios | [Listo / En avance] |
-| Modificar usuario | [Listo / En avance] |
-| Eliminar o desactivar usuario | [Listo / En avance] |
+| Listar usuarios | Listo |
+| Modificar usuario | Listo |
+| Eliminar o desactivar usuario | Listo |
 | Catálogo y pedidos | Pendiente |
 
-Pruebas: manuales, con Swagger, Postman y el frontend. [COMPLETAR: casos probados y resultados]
+## Pruebas
+**Herramientas utilizadas:**
+- **Swagger UI:** Accesible en la ruta `/api-docs`. Se utilizó como entorno principal para documentar el contrato de la API y ejecutar pruebas rápidas de los endpoints directamente desde el navegador.
+- **Postman:** Empleado para simular escenarios de error específicos, manipular los encabezados (Headers), verificar la validación de los tokens Bearer y capturar los tiempos de respuesta.
+- **Frontend (React con Axios):** Utilizado para probar el flujo de usuario real, validando la correcta configuración de las políticas CORS, el manejo de errores HTTP y la integración de variables de entorno.
 
+**Casos de prueba principales validados:**
+1. **Validación de formato (DTOs):**
+   - Rechazo de peticiones con datos faltantes, correos inválidos, formato de RUN incorrecto o contraseñas fuera del rango permitido (4 a 64 caracteres), devolviendo estado HTTP `400 Bad Request`.
+2. **Autenticación y Persistencia:**
+   - Inicio de sesión exitoso utilizando la cuenta administradora semilla (`admin@duoc.cl` / `12345`), verificando la correcta generación y recepción del token JWT.
+   - Rechazo de acceso (estado HTTP `401 Unauthorized`) al ingresar credenciales incorrectas.
+3. **Seguridad y Control de Acceso (Middlewares):**
+   - Bloqueo de acceso a rutas protegidas cuando no se provee un token JWT, o cuando este se encuentra expirado (estado HTTP `401`).
+   - Verificación de roles: Intento deliberado de acceder a la ruta `GET /usuarios` utilizando un token de rol "Cliente", verificando que el sistema lo rechace correctamente por privilegios insuficientes (estado HTTP `403 Forbidden`).
+4. **Reglas de Negocio:**
+   - Prevención de registros duplicados: Verificación de que el sistema retorna `409 Conflict` al intentar registrar un usuario con un correo o RUN ya existente en PostgreSQL.
 ## Material complementario
 Carpeta de Drive con documentos del semestre: https://drive.google.com/drive/folders/1yBC232qOvIjry0WJZZulEDMttQJMAu9i?usp=drive_link

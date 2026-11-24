@@ -46,6 +46,11 @@ CREATE TABLE IF NOT EXISTS modelo (
     UNIQUE (marca_id, nombre)
 );
 
+CREATE TABLE IF NOT EXISTS categoria (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS producto (
     id SERIAL PRIMARY KEY,
     codigo VARCHAR(10) NOT NULL UNIQUE,
@@ -55,5 +60,10 @@ CREATE TABLE IF NOT EXISTS producto (
     stock INT NOT NULL CHECK (stock >= 0),
     marca_id INT NOT NULL REFERENCES marca(id),
     modelo_id INT NOT NULL REFERENCES modelo(id),
-    categoria VARCHAR(50) NOT NULL
+    categoria_id INT NOT NULL REFERENCES categoria(id)
 );
+
+--Esto es para desarrollo de apps moviles
+ALTER TABLE usuario DROP CONSTRAINT usuario_tipo_check;
+ALTER TABLE usuario ADD CONSTRAINT usuario_tipo_check
+  CHECK (tipo IN ('Administrador','Encargado','Vendedor','Cliente'));

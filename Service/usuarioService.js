@@ -1,70 +1,26 @@
 const bcrypt = require('bcryptjs');
 const repo = require('../Repository/usuarioRepository');
 const { generarToken } = require('../Utils/jwt');
-const ROLES = ['Administrador', 'Vendedor', 'Cliente'];
 const error = (status, mensaje) => ({ status, mensaje });
 
-const PATRONES = {
-  correo: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  run: /^\d{6,8}[0-9K]$/i
-};
-
+//registro publico-servidor fija rol cliente
 async function registrar(datos) {
-  const { run, nombre, apellidos, email, password, fechaNacimiento, direccion, telefono, comunaId } = datos || {};
-
-  if (!run || !nombre || !apellidos || !email || !password)
-    throw error(400, 'Faltan campos obligatorios');
-
-  const runNorm = String(run).trim().toUpperCase();
-  if (!PATRONES.run.test(runNorm))
-    throw error(400, 'RUN inválido');
-  if (!PATRONES.correo.test(email))
-    throw error(400, 'Correo inválido');
-
-  //se modifico de 10 a 64 el largo de la contraseña para seguir buenas practicas de seguridad
-  if (password.length < 4 || password.length > 64)
-    throw error(400, 'La contraseña debe tener entre 4 y 10 caracteres');
-
-  const emailNorm = email.trim().toLowerCase();
-
-  if (await repo.buscarPorEmail(emailNorm)) throw error(409, 'El correo ya está registrado');
-  if (await repo.buscarPorRun(runNorm)) throw error(409, 'El RUN ya está registrado');
-
-  const hash = await bcrypt.hash(password, 10);
-  try {
-    const usuarioCreado = await repo.crear({
-      run: runNorm, nombre, apellidos, email: emailNorm,
-      password: hash, tipo: 'Cliente', fechaNacimiento,
-      direccion, telefono, comunaId
-    });
-
-    const payload = { id: usuarioCreado.id, email: usuarioCreado.email, tipo: usuarioCreado.tipo };
-    const token = await generarToken(payload);
-
-    return {
-      mensaje: 'Usuario registrado exitosamente',
-      token,
-      usuario: usuarioCreado
-    };
-  } catch (e) {
-    if (e.code === '23505') throw error(409, 'Usuario ya registrado');
-    throw e;
-  }
+  const usuarioCreado = await crearUsuario(datos, 'Cliente');
+  const token = await generarToken({ id: usuarioCreado.id, email: usuarioCreado.email, tipo: usuarioCreado.tipo });
+  return {
+    mensaje: 'Usuario registrado exitosamente', token, usuario: usuarioCreado
+  };
 }
+
+  
 async function login(datos) {
-  const { email, password } = datos || {};
+  const { email, password } = datos;
 
-  if(!email || !password){
-    throw error(400, 'Faltan credenciales');
-  }
-
-  const emailNorm = String(email).trim().toLowerCase();
-
-  const usuario = await repo.buscarPorEmail(emailNorm);
+  const usuario = await repo.buscarPorEmail(email);
   if (!usuario || !usuario.activo) throw error(401, 'Credenciales incorrectas');
 
   const passwordValida = await bcrypt.compare(password, usuario.password);
-  if(!passwordValida){
+  if (!passwordValida) {
     throw error(401, 'Credenciales incorrectas');
   }
 
@@ -115,28 +71,25 @@ async function actualizar(id, datos, solicitante) {
   const actual = await repo.buscarPorId(id);
   if (!actual) throw error(404, 'Usuario no encontrado');
 
-  const { nombre, apellidos, email, fechaNacimiento, tipo } = datos || {};
-
-  if (email && !PATRONES.correo.test(email)) throw error(400, 'Correo inválido');
-
-  if (tipo && tipo !== actual.tipo) {
-    if (solicitante.tipo !== 'Administrador')
-      throw error(403, 'Solo el Administrador puede cambiar el rol');
-    if (!ROLES.includes(tipo)) throw error(400, 'Rol inválido');
+  if (datos.tipo && datos.tipo !== actual.tipo && solicitante.tipo !== 'Administrador') {
+    throw error(403, 'Solo el Administrador puede cambiar el rol');
   }
-
-  const emailNorm = email ? email.trim().toLowerCase() : actual.email;
-  if (emailNorm !== actual.email && await repo.buscarPorEmail(emailNorm)) {
+  if (datos.email && datos.email !== actual.email && await repo.buscarPorEmail(datos.email)) {
     throw error(409, 'El correo ya está registrado');
   }
-
-  return await repo.actualizar(id, {
-    nombre: nombre || actual.nombre,
-    apellidos: apellidos || actual.apellidos,
-    email: emailNorm,
-    fechaNacimiento: fechaNacimiento || actual.fecha_nacimiento,
-    tipo: tipo || actual.tipo
-  });
+  
+try {
+    return await repo.actualizar(id, {
+      nombre: datos.nombre ?? actual.nombre,
+      apellidos: datos.apellidos ?? actual.apellidos,
+      email: datos.email ?? actual.email,
+      fechaNacimiento: datos.fechaNacimiento ?? actual.fecha_nacimiento,
+      tipo: datos.tipo ?? actual.tipo
+    });
+  } catch (e) {
+    if (e.code === '23505') throw error(409, 'El correo ya está registrado');
+    throw e;
+  }
 }
 
 async function eliminar(id, solicitante) {
@@ -145,4 +98,22 @@ async function eliminar(id, solicitante) {
     throw error(409, 'No puedes desactivar tu propia cuenta');
   if (!(await repo.desactivar(id))) throw error(404, 'Usuario no encontrado');
 }
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar};
+
+async function crearUsuario(entrada, tipo) {
+  if (await repo.buscarPorEmail(entrada.email)) throw error(409, 'El correo ya está registrado');
+  if (await repo.buscarPorRun(entrada.run)) throw error(409, 'El RUN ya está registrado');
+
+  const hash = await bcrypt.hash(entrada.password, 10);
+  try {
+    return await repo.crear({ ...entrada, password: hash, tipo });
+  } catch (e) {
+    if (e.code === '23505') throw error(409, 'Usuario ya registrado');
+    throw e;
+  }
+}
+
+async function crear(entrada) {
+  return await crearUsuario(entrada, entrada.tipo);
+}
+
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear };

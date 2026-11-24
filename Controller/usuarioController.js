@@ -1,8 +1,10 @@
 const service = require('../Service/usuarioService');
+const { registroRequestDto, loginRequestDto, crearUsuarioRequestDto, actualizarRequestDto } = require('../Dto/usuario.dto');
 
 async function login(req, res) {
   try {
-    const resultado = await service.login(req.body);
+    const entrada = loginRequestDto(req.body);
+    const resultado = await service.login(entrada);
     res.status(200).json(resultado);
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.mensaje });
@@ -13,7 +15,8 @@ async function login(req, res) {
 
 async function registrar(req, res) {
   try {
-    const resultado = await service.registrar(req.body);
+    const entrada = registroRequestDto(req.body)
+    const resultado = await service.registrar(entrada);
     res.status(201).json(resultado);
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.mensaje });
@@ -43,7 +46,9 @@ async function obtener(req, res) {
 }
 
 async function actualizar(req, res) {
-  try { res.status(200).json(await service.actualizar(req.params.id, req.body, req.usuario)); }
+  try { 
+    const datos = actualizarRequestDto(req.body);
+    res.status(200).json(await service.actualizar(req.params.id, datos, req.usuario)); }
   catch (e) { responderError(res, e); }
 }
 
@@ -52,4 +57,11 @@ async function eliminar(req, res) {
   catch (e) { responderError(res, e); }
 }
 
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar };
+async function crear(req, res) {
+  try { 
+    const datos = crearUsuarioRequestDto(req.body);
+    res.status(201).json(await service.crear(datos)); }
+  catch (e) { responderError(res, e); }
+}
+
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear };

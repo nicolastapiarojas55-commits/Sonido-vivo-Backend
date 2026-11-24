@@ -7,5 +7,6 @@ router.get('/', verificarToken, soloRol('Administrador'), usuarioController.list
 router.get('/:id', verificarToken, usuarioController.obtener);
 router.put('/:id', verificarToken, usuarioController.actualizar);
 router.delete('/:id', verificarToken, soloRol('Administrador'), usuarioController.eliminar);
+router.post('/', verificarToken, soloRol('Administrador'), usuarioController.crear);
 
 module.exports = router;
