@@ -1,0 +1,17 @@
+const pool = require('../Database/db');
+
+async function listarRegiones() {
+  const { rows } = await pool.query(
+    'SELECT id, nombre FROM region ORDER BY id ASC'
+  );
+  return rows;
+}
+
+async function listarComunas() {
+  const { rows } = await pool.query(
+    'SELECT id, nombre, region_id FROM comuna ORDER BY nombre ASC'
+  );
+  return rows;
+}
+
+module.exports = { listarRegiones, listarComunas, listarComunasPorRegion };
