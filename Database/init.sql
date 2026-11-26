@@ -62,6 +62,26 @@ CREATE TABLE IF NOT EXISTS producto (
     modelo_id INT NOT NULL REFERENCES modelo(id),
     categoria VARCHAR(50) NOT NULL
 );
+CREATE TABLE IF NOT EXISTS pedido (
+  id SERIAL PRIMARY KEY,
+  usuario_id INT NOT NULL REFERENCES usuario(id),
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  estado VARCHAR(20) NOT NULL DEFAULT 'En preparación'
+    CHECK (estado IN ('En preparación', 'Despachado', 'Entregado')),
+  tipo_entrega VARCHAR(30) NOT NULL
+    CHECK (tipo_entrega IN ('Despacho a domicilio', 'Retiro en tienda')),
+  direccion VARCHAR(100),
+  total NUMERIC(12,2) NOT NULL CHECK (total >= 0),
+  CHECK (tipo_entrega <> 'Despacho a domicilio' OR direccion IS NOT NULL)
+);
+
+CREATE TABLE IF NOT EXISTS detalle_pedido (
+  id SERIAL PRIMARY KEY,
+  pedido_id INT NOT NULL REFERENCES pedido(id) ON DELETE CASCADE,
+  producto_id INT NOT NULL REFERENCES producto(id),
+  cantidad INT NOT NULL CHECK (cantidad > 0),
+  precio_unitario NUMERIC(10,2) NOT NULL CHECK (precio_unitario >= 0)
+);
 
 --Esto es para desarrollo de apps moviles
 ALTER TABLE usuario DROP CONSTRAINT usuario_tipo_check;
