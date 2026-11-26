@@ -58,12 +58,8 @@ async function eliminar(req, res) {
 }
 
 async function activar(req, res) {
-  try {
-    await usuarioService.activar(Number(req.params.id));
-    res.status(204).send();
-  } catch (e) {
-    responderError(res, e);
-  }
+  try { await service.activar(Number(req.params.id)); res.status(204).send(); }
+  catch (e) { responderError(res, e); }
 }
 
 async function crear(req, res) {
