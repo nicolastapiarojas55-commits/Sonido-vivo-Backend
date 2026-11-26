@@ -56,9 +56,12 @@ async function crear(u) {
     client.release();
   }
 }
+async function activar(id) {
+  await pool.query('UPDATE usuario SET activo = TRUE WHERE id = $1', [id]);
+}
 
 async function listar() {
   const r = await pool.query(`SELECT ${COLUMNAS} FROM usuario`);
   return r.rows;
 }
-module.exports = { buscarPorEmail, buscarPorRun, crear, listar, buscarPorId, actualizar, desactivar };
+module.exports = { buscarPorEmail, buscarPorRun, crear, listar, buscarPorId, actualizar, desactivar, activar };

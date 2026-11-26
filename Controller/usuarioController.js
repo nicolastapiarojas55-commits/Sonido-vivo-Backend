@@ -57,6 +57,15 @@ async function eliminar(req, res) {
   catch (e) { responderError(res, e); }
 }
 
+async function activar(req, res) {
+  try {
+    await usuarioService.activar(Number(req.params.id));
+    res.status(204).send();
+  } catch (e) {
+    responderError(res, e);
+  }
+}
+
 async function crear(req, res) {
   try { 
     const datos = crearUsuarioRequestDto(req.body);

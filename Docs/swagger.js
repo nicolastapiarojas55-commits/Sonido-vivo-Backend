@@ -166,6 +166,19 @@ module.exports = {
           409: error('No puedes desactivar tu propia cuenta')
         }
       }
+    },
+    '/api/v1/usuarios/{id}/activar': {
+      patch: {
+        tags: ['Usuarios'], summary: 'Reactivar un usuario desactivado (solo Administrador)',
+        security: seguridad, parameters: [parametroId],
+        responses: {
+          204: { description: 'Usuario activado' },
+          401: error('Token ausente, inválido o vencido'),
+          403: error('Rol insuficiente'),
+          404: error('Usuario no encontrado'),
+          409: error('El usuario ya está activo')
+        }
+      }
     }
   }
 };

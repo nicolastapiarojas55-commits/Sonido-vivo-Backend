@@ -111,9 +111,15 @@ async function crearUsuario(entrada, tipo) {
     throw e;
   }
 }
+async function activar(id) {
+  const usuario = await usuarioRepository.buscarPorId(id);
+  if (!usuario) throw { status: 404, message: 'Usuario no encontrado' };
+  if (usuario.activo) throw { status: 409, message: 'El usuario ya está activo' };
+  await usuarioRepository.activar(id);
+}
 
 async function crear(entrada) {
   return await crearUsuario(entrada, entrada.tipo);
 }
 
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear };
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear, activar };
