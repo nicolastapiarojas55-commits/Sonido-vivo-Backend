@@ -112,10 +112,10 @@ async function crearUsuario(entrada, tipo) {
   }
 }
 async function activar(id) {
-  const usuario = await usuarioRepository.buscarPorId(id);
-  if (!usuario) throw { status: 404, message: 'Usuario no encontrado' };
-  if (usuario.activo) throw { status: 409, message: 'El usuario ya está activo' };
-  await usuarioRepository.activar(id);
+  const usuario = await repo.buscarPorId(id);
+  if (!usuario) throw error(404, 'Usuario no encontrado');
+  if (usuario.activo) throw error(409, 'El usuario ya está activo');
+  await repo.activar(id);
 }
 
 async function crear(entrada) {

@@ -73,4 +73,4 @@ async function crear(req, res) {
   catch (e) { responderError(res, e); }
 }
 
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear };
+module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear, activar };
