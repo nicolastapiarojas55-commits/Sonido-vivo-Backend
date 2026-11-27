@@ -1,7 +1,7 @@
 const service = require('../Service/pedidoService');
 
 function responderError(res, e) {
-  if (e.status) return res.status(e.status).json({ error: e.mensaje });
+  if (e.status) return res.status(e.status).json({ error: e.message });
   console.error(e);
   res.status(500).json({ error: 'Error interno del servidor' });
 }

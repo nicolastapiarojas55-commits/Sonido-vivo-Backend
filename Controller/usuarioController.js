@@ -1,29 +1,7 @@
 const service = require('../Service/usuarioService');
-const { registroRequestDto, loginRequestDto, crearUsuarioRequestDto, actualizarRequestDto } = require('../Dto/usuario.dto');
+const { crearUsuarioRequestDto, actualizarRequestDto } = require('../Dto/usuario.dto');
 
-async function login(req, res) {
-  try {
-    const entrada = loginRequestDto(req.body);
-    const resultado = await service.login(entrada);
-    res.status(200).json(resultado);
-  } catch (e) {
-    if (e.status) return res.status(e.status).json({ error: e.mensaje });
-    console.error(e);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-}
 
-async function registrar(req, res) {
-  try {
-    const entrada = registroRequestDto(req.body)
-    const resultado = await service.registrar(entrada);
-    res.status(201).json(resultado);
-  } catch (e) {
-    if (e.status) return res.status(e.status).json({ error: e.mensaje });
-    console.error(e);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-}
 
 async function listar(req, res) {
   try {
@@ -69,4 +47,4 @@ async function crear(req, res) {
   catch (e) { responderError(res, e); }
 }
 
-module.exports = { registrar, login, listar, obtener, actualizar, eliminar, crear, activar };
+module.exports = { listar, obtener, actualizar, eliminar, crear, activar };

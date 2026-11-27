@@ -25,9 +25,9 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/usuarios', usuarioRoutes);
 app.use('/api/v1/productos', productoRoutes);
+app.use('/api/v1/pedidos', pedidoRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
-app.use('/api/v1/pedidos', pedidoRoutes);
 
 const PORT = process.env.PORT || 3000;
 
