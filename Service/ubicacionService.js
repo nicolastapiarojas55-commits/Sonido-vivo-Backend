@@ -6,7 +6,7 @@ async function listarRegiones() {
 }
 
 async function listarComunas() {
-    return await repo.listarComunas;
+    return await repo.listarComunas();
 }
 
 module.exports = { listarRegiones, listarComunas };

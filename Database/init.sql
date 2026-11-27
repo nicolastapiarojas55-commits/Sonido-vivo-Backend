@@ -84,6 +84,6 @@ CREATE TABLE IF NOT EXISTS detalle_pedido (
 );
 
 --Esto es para desarrollo de apps moviles
-ALTER TABLE usuario DROP CONSTRAINT usuario_tipo_check;
+ALTER TABLE usuario DROP CONSTRAINT IF EXISTS usuario_tipo_check;
 ALTER TABLE usuario ADD CONSTRAINT usuario_tipo_check
   CHECK (tipo IN ('Administrador','Encargado','Vendedor','Cliente'));

@@ -1,10 +1,10 @@
 const service = require('../Service/ubicacionService');
 
-async function listarRegiones(res) {
+async function listarRegiones(req, res) {
   res.status(200).json(await service.listarRegiones());
 }
 
-async function listarComunas(res) {
+async function listarComunas(req, res) {
   res.status(200).json(await service.listarComunas());
 }
 

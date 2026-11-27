@@ -3,7 +3,8 @@ const pool = require('../Database/db');
 const SELECT = `
   SELECT p.id, p.codigo, p.categoria, p.nombre, p.descripcion,
          p.precio::float8 AS precio, p.stock,
-         p.marca_id, m.nombre AS marca, p.modelo_id, mo.nombre AS modelo
+         p.marca_id AS "marcaId", m.nombre AS marca,
+         p.modelo_id AS "modeloId", mo.nombre AS modelo
   FROM producto p
   JOIN marca m ON m.id = p.marca_id
   JOIN modelo mo ON mo.id = p.modelo_id`;
@@ -53,7 +54,12 @@ async function eliminar(id) {
   return r.rowCount > 0;
 }
 
+async function actualizarStock(id, stock) {
+  const r = await pool.query('UPDATE producto SET stock = $1 WHERE id = $2', [stock, id]);
+  return r.rowCount > 0 ? buscarPorId(id) : null;
+}
+
 module.exports = {
   listar, buscarPorId, existeCodigo, modeloPerteneceAMarca,
-  crear, actualizar, eliminar
+  crear, actualizar, eliminar, actualizarStock
 };

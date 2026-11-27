@@ -1,7 +1,7 @@
 const repo = require('../Repository/productoRepository');
 
 const error = (status, mensaje) => ({ status, mensaje });
-
+const STOCK_MAX = 1000000;
 function esVacio(valor) {
   return valor === undefined || valor === null || String(valor).trim() === '';
 }
@@ -22,13 +22,13 @@ function validar(d) {
     throw error(400, 'El nombre admite hasta 100 caracteres');
   if (String(descripcion).trim().length > 500)
     throw error(400, 'La descripción admite hasta 500 caracteres');
-  if (esVacio(precio) || !(Number(precio) >= 0))
-    throw error(400, 'El precio debe ser un número mayor o igual a 0');
-  if (esVacio(stock) || !Number.isInteger(Number(stock)) || Number(stock) < 0)
-    throw error(400, 'El stock debe ser un entero mayor o igual a 0');
+  if (esVacio(precio) || !(Number(precio) >= 0) || Number(precio) > 99999999)
+    throw error(400, 'El precio debe ser un número entre 0 y 99.999.999');
+  const stockNum = validarStock(stock);
   if (esVacio(marcaId) || !Number.isInteger(Number(marcaId)) ||
       esVacio(modeloId) || !Number.isInteger(Number(modeloId)))
     throw error(400, 'Marca y modelo son obligatorios');
+  if (Number(precio) > 99999999) throw error(400, 'El precio es demasiado grande');
 
   return {
     codigo: String(codigo).trim().toUpperCase(),
@@ -36,7 +36,7 @@ function validar(d) {
     nombre: String(nombre).trim(),
     descripcion: String(descripcion).trim(),
     precio: Number(precio),
-    stock: Number(stock),
+    stock: stockNum,
     marcaId: Number(marcaId),
     modeloId: Number(modeloId)
   };
@@ -44,6 +44,12 @@ function validar(d) {
 
 function validarId(id) {
   if (!Number.isInteger(Number(id))) throw error(400, 'Id inválido');
+}
+
+function validarStock(valor) {
+  if (esVacio(valor) || !Number.isInteger(Number(valor)) || Number(valor) < 0 || Number(valor) > STOCK_MAX)
+    throw error(400, `El stock debe ser un entero entre 0 y ${STOCK_MAX}`);
+  return Number(valor);
 }
 
 async function validarMarcaModelo(p) {
@@ -67,7 +73,12 @@ async function crear(datos) {
   if (await repo.existeCodigo(p.codigo))
     throw error(409, 'Ya existe un producto con ese código');
   await validarMarcaModelo(p);
-  return await repo.crear(p);
+
+  try { return await repo.crear(p); }
+  catch (e) {
+    if (e.code === '23505') throw error(409, 'Ya existe un producto con ese código');
+    throw e;
+  }
 }
 
 async function actualizar(id, datos) {
@@ -81,7 +92,12 @@ async function actualizar(id, datos) {
     throw error(409, 'Ya existe un producto con ese código');
 
   await validarMarcaModelo(p);
-  return await repo.actualizar(id, p);
+
+  try { return await repo.actualizar(id, p); }
+  catch (e) {
+    if (e.code === '23505') throw error(409, 'Ya existe un producto con ese código');
+    throw e;
+  }
 }
 
 async function eliminar(id) {
@@ -95,4 +111,12 @@ async function eliminar(id) {
   }
 }
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+async function actualizarStock(id, datos) {
+  validarId(id);
+  const stock = validarStock(datos?.stock);
+  const producto = await repo.actualizarStock(id, stock);
+  if (!producto) throw error(404, 'Producto no encontrado');
+  return producto;
+}
+
+module.exports = { listar, obtener, crear, actualizar, eliminar, actualizarStock };

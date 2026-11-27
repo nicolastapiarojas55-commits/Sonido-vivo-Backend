@@ -14,4 +14,4 @@ async function listarComunas() {
   return rows;
 }
 
-module.exports = { listarRegiones, listarComunas, listarComunasPorRegion };
+module.exports = { listarRegiones, listarComunas};

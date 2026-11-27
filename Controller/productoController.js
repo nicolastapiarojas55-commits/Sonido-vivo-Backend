@@ -31,4 +31,9 @@ async function eliminar(req, res) {
   catch (e) { responderError(res, e); }
 }
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+async function actualizarStock(req, res) {
+  try { res.status(200).json(await service.actualizarStock(req.params.id, req.body)); }
+  catch (e) { responderError(res, e); }
+}
+
+module.exports = { listar, obtener, crear, actualizar, eliminar, actualizarStock };
